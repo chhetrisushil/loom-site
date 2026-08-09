@@ -1,0 +1,100 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const adrs = (await getCollection("docs"))
+  .filter((d) => d.data.section === "Decision records")
+  .sort((a, b) => b.data.order - a.data.order); // newest decision first
+
+/** "ADR 0077 — Typed resume payloads: …" → the part after the dash. */
+function shortTitle(title: string): string {
+  const m = title.match(/^ADR\s+\d+\s*[—–-]\s*(.+)$/);
+  return (m ? m[1] : title).trim();
+}
+// ids are collection-relative — "adr/0077-typed-resume-payloads" — so drop the folder first.
+const num = (id: string) => id.split("/").pop()?.match(/^(\d{4})/)?.[1] ?? "";
+---
+
+<Base
+  title="Decision records — Loom"
+  description="Every architectural decision in Loom, with the reasoning, the evidence, and the alternatives that were rejected."
+>
+  <div class="shell page">
+    <p class="crumb">Documentation</p>
+    <h1>Decision records</h1>
+    <p class="lede">
+      Every architectural trade-off in Loom is written down — what was decided, why, what evidence
+      backed it, and which alternatives were rejected and on what grounds. Several record a
+      decision <em>not</em> to build something. They are listed newest first.
+    </p>
+
+    <input id="q" type="search" placeholder="Filter by title or number…" aria-label="Filter decision records" autocomplete="off" />
+    <p class="count"><span id="shown">{adrs.length}</span> of {adrs.length} records</p>
+
+    <ul class="list" id="list">
+      {adrs.map((d) => (
+        <li data-text={`${num(d.id)} ${d.data.title}`.toLowerCase()}>
+          <a href={`${base}/docs/${d.id}`}>
+            <span class="n">{num(d.id)}</span>
+            <span class="t">{shortTitle(d.data.title)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .page { padding: 3rem 0 4rem; }
+  .crumb { text-transform: uppercase; letter-spacing: 0.11em; font-size: 0.7rem; font-weight: 700; color: var(--accent); margin: 0 0 0.5rem; }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); margin: 0 0 0.9rem; }
+  .lede { color: var(--text-dim); max-width: 66ch; margin: 0 0 1.8rem; }
+
+  #q {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.6rem 0.85rem;
+    border-radius: 9px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-inset);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.93rem;
+  }
+  #q::placeholder { color: var(--text-faint); }
+  .count { color: var(--text-faint); font-size: 0.83rem; margin: 0.6rem 0 1.2rem; }
+
+  .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+  .list a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 0.94rem;
+  }
+  .list a:hover { border-color: var(--accent); text-decoration: none; }
+  .n { font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); font-weight: 600; flex: none; }
+  .t { color: var(--text-dim); }
+  .list li.hide { display: none; }
+</style>
+
+<script>
+  const q = document.getElementById("q") as HTMLInputElement | null;
+  const items = Array.from(document.querySelectorAll<HTMLLIElement>("#list li"));
+  const shown = document.getElementById("shown");
+  q?.addEventListener("input", () => {
+    const term = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const li of items) {
+      const hit = !term || (li.dataset.text ?? "").includes(term);
+      li.classList.toggle("hide", !hit);
+      if (hit) n++;
+    }
+    if (shown) shown.textContent = String(n);
+  });
+</script>

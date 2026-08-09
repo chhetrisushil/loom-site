@@ -1,0 +1,79 @@
+name: Deploy site to GitHub Pages
+
+# The docs live in the PRIVATE loom repo, so CI must check it out with a token that can read
+# it. Create a fine-grained PAT with `Contents: read` on chhetrisushil/loom and store it as the
+# LOOM_DOCS_TOKEN secret in this repository. Without it the build fails loudly rather than
+# publishing a site with no documentation.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # The site is a projection of loom's docs, so it can also be rebuilt on demand from there.
+  repository_dispatch:
+    types: [docs-updated]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+        with:
+          path: loom-site
+
+      - name: Checkout loom (docs source)
+        uses: actions/checkout@v4
+        with:
+          repository: chhetrisushil/loom
+          token: ${{ secrets.LOOM_DOCS_TOKEN }}
+          path: loom
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: loom-site/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: loom-site
+
+      - run: pnpm build
+        working-directory: loom-site
+        env:
+          LOOM_REPO: ${{ github.workspace }}/loom
+
+      # A build that silently produced no docs is worse than a failed one.
+      - name: Verify the build published documentation
+        working-directory: loom-site
+        run: |
+          pages=$(find dist -name index.html | wc -l)
+          echo "built $pages pages"
+          test "$pages" -gt 50 || { echo "::error::only $pages pages built — docs sync likely failed"; exit 1; }
+          test ! -d dist/docs/requirements || { echo "::error::internal requirements docs leaked into the build"; exit 1; }
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: loom-site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

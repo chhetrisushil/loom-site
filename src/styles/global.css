@@ -1,0 +1,143 @@
+/* ── Loom design tokens ───────────────────────────────────────────────────────
+   Dark-first, like qwik.dev and angular.dev, but with its own identity: loom's
+   metaphor is a woven thread, so the accent is a warm amber-to-violet gradient
+   over a cool near-black — thread over loom. Light mode is a real second theme,
+   not an inversion.                                                            */
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --bg: #0b0d12;
+  --bg-raised: #11141b;
+  --bg-inset: #0e1117;
+  --border: #1e2430;
+  --border-strong: #2b3444;
+  --text: #e7ecf3;
+  --text-dim: #a3adbf;
+  --text-faint: #6b7688;
+
+  --accent: #f0a742;
+  --accent-2: #a06bff;
+  --accent-soft: rgba(240, 167, 66, 0.12);
+  --link: #f0b968;
+
+  --grad: linear-gradient(100deg, #f0a742 0%, #e0725f 42%, #a06bff 100%);
+  --radius: 12px;
+  --content-w: 1120px;
+  --sidebar-w: 264px;
+  --toc-w: 220px;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-raised: #f7f8fa;
+  --bg-inset: #f2f4f7;
+  --border: #e3e7ee;
+  --border-strong: #ccd3de;
+  --text: #10141c;
+  --text-dim: #4d5768;
+  --text-faint: #77808f;
+  --accent: #b26a00;
+  --accent-2: #6f3fd6;
+  --accent-soft: rgba(178, 106, 0, 0.1);
+  --link: #a35c00;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+}
+html[data-theme="light"] { color-scheme: light; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4 { line-height: 1.25; font-weight: 650; letter-spacing: -0.02em; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+:not(pre) > code {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.1em 0.38em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+pre {
+  background: var(--bg-inset) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-size: 0.855rem;
+  line-height: 1.6;
+}
+pre code { background: none; border: 0; padding: 0; white-space: pre; }
+
+.shell { max-width: var(--content-w); margin: 0 auto; padding: 0 1.5rem; }
+
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Buttons ------------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.94rem;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { text-decoration: none; transform: translateY(-1px); }
+.btn-primary { background: var(--grad); color: #14100a; }
+.btn-ghost { border-color: var(--border-strong); color: var(--text); background: var(--bg-raised); }
+.btn-ghost:hover { border-color: var(--accent); }
+
+/* Skip link — keyboard users land on content, not the whole nav ------------- */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--bg-raised);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  z-index: 200;
+}
+.skip:focus { left: 1rem; top: 1rem; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

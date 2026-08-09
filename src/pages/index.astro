@@ -1,0 +1,218 @@
+---
+import { Code } from "astro:components";
+import Base from "../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const sample = `import { flow$, step$, handler$ } from "@loom/core";
+import { z } from "zod";
+
+const assess = step$({
+  id: "assess",
+  inputSchema: z.object({ table: z.string() }),
+  outputSchema: z.object({ risk: z.enum(["low", "high"]) }),
+  handler: handler$(async (input) => rateMigration(input.table)),
+});
+
+const ApprovalDecision = z.object({ approved: z.boolean(), approvedBy: z.string() });
+type ApprovalDecision = z.infer<typeof ApprovalDecision>;
+
+const runner = async (ctx, input) => {
+  const { risk } = await ctx.run(assess, { table: input.table });
+  if (risk === "low") return apply(input.table);
+
+  // Durable checkpoint. The process can restart, redeploy, move machines —
+  // when the approval arrives, execution resumes from exactly here.
+  const decision = await ctx.suspend<ApprovalDecision>({
+    on: "ApprovalGranted",
+    correlationKey: input.table,
+  });
+
+  return decision.approved ? apply(input.table) : { applied: false };
+};
+
+export const migrationGuard = flow$({
+  id: "migration-guard",
+  version: "1.0.0",
+  steps: [assess],
+  // Parsed BEFORE the event is appended, so a malformed approval is refused
+  // rather than becoming a permanent part of the log.
+  resumeSchemas: { ApprovalGranted: ApprovalDecision },
+});`;
+
+const features = [
+  {
+    t: "Durable by default",
+    d: "Every step and decision is an immutable fact in an append-only log. State is <code>fold(events)</code> — never a mutable blob you hope stayed in sync.",
+  },
+  {
+    t: "Suspend for a human",
+    d: "One line parks an execution durably. It survives restarts, redeploys and machine moves, then resumes at exactly the same point — no state machine, no queue.",
+  },
+  {
+    t: "Replay, bit-for-bit",
+    d: "Re-fold any log and get identical state. Completed steps are served from the log, so effects never run twice. Debugging is time travel, not guesswork.",
+  },
+  {
+    t: "Fork and explore",
+    d: "Branch an execution at a checkpoint, simulate several strategies in parallel, promote the winner. Git-style branching for running processes.",
+  },
+  {
+    t: "Plain TypeScript",
+    d: "Flows read like async functions because they are. The intelligence is yours to write; Loom supplies the durable spine underneath it.",
+  },
+  {
+    t: "Pluggable everything",
+    d: "Storage, compute, LLM providers, protocols and renderers sit behind versioned SPIs with conformance kits. First- and third-party plugins wire identically.",
+  },
+];
+
+const proof = [
+  { n: "~1.1M", l: "transient calls/sec", s: "per process, measured" },
+  { n: "~5.7K", l: "durable exec/sec", s: "1-step flow, measured" },
+  { n: "77", l: "decision records", s: "every trade-off written down" },
+  { n: "0", l: "kernel hooks for plugins", s: "existing seams only" },
+];
+---
+
+<Base title="Loom — the execution kernel for agentic applications">
+  <section class="hero">
+    <div class="shell">
+      <p class="eyebrow">Execution kernel for agentic applications</p>
+      <h1>
+        Agents that <span class="grad-text">survive</span><br />
+        contact with production.
+      </h1>
+      <p class="lede">
+        Loom treats an agentic workflow as a <strong>process that unfolds over time</strong>, not a
+        request that returns once. Every decision is recorded as an immutable fact — so any
+        execution can be paused for a human, resumed on another machine, replayed bit-for-bit for
+        debugging, forked to explore alternatives, and evaluated against its own history.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href={`${base}/docs/getting-started`}>Get started</a>
+        <a class="btn btn-ghost" href={`${base}/docs/architecture`}>Read the architecture</a>
+      </div>
+      <p class="sub">Plain TypeScript. No DSL, no YAML, no state machines.</p>
+    </div>
+    <div class="glow" aria-hidden="true"></div>
+  </section>
+
+  <section class="shell code-sec">
+    <div class="code-head">
+      <h2>A human-in-the-loop flow, in full</h2>
+      <p>
+        No orchestration boilerplate. The gate is one <code>await</code>; its payload contract is
+        declared once and enforced before anything is written to the log.
+      </p>
+    </div>
+    <Code code={sample} lang="ts" theme="github-dark-default" />
+  </section>
+
+  <section class="shell">
+    <div class="grid">
+      {features.map((f) => (
+        <article class="card">
+          <h3>{f.t}</h3>
+          <p set:html={f.d} />
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell proof-sec">
+    <div class="proof">
+      {proof.map((p) => (
+        <div class="stat">
+          <div class="n grad-text">{p.n}</div>
+          <div class="l">{p.l}</div>
+          <div class="s">{p.s}</div>
+        </div>
+      ))}
+    </div>
+    <p class="proof-note">
+      Numbers are measured on committed benchmarks, not estimated —
+      <a href={`${base}/docs/benchmarks`}>see the methodology and what they do not mean</a>.
+    </p>
+  </section>
+
+  <section class="shell final">
+    <h2>Start with a running flow in five minutes</h2>
+    <p>
+      Scaffold an app, run it headless, suspend it for approval, resume it, then replay the log
+      and watch it reproduce exactly.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href={`${base}/docs/getting-started`}>Getting started</a>
+      <a class="btn btn-ghost" href={`${base}/docs/user-guide`}>Browse the user guide</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { position: relative; isolation: isolate; padding: 5.5rem 0 4rem; overflow: hidden; }
+  .glow {
+    position: absolute;
+    inset: -40% 0 auto 0;
+    height: 620px;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(240, 167, 66, 0.16), transparent 70%),
+      radial-gradient(38% 38% at 72% 42%, rgba(160, 107, 255, 0.16), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.9;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0 0 1rem;
+  }
+  h1 { font-size: clamp(2.4rem, 6.4vw, 4rem); margin: 0 0 1.4rem; letter-spacing: -0.035em; }
+  .lede { font-size: clamp(1.02rem, 1.7vw, 1.19rem); color: var(--text-dim); max-width: 62ch; margin: 0 0 2rem; }
+  .cta { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .sub { color: var(--text-faint); font-size: 0.9rem; margin: 1.1rem 0 0; }
+
+  .code-sec { margin-top: 4.5rem; }
+  .code-head h2 { font-size: 1.6rem; margin: 0 0 0.5rem; }
+  .code-head p { color: var(--text-dim); max-width: 66ch; margin: 0 0 1.4rem; }
+
+  .grid {
+    margin-top: 4.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+    gap: 1.1rem;
+  }
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .card h3 { margin: 0 0 0.5rem; font-size: 1.03rem; }
+  .card p { margin: 0; color: var(--text-dim); font-size: 0.93rem; }
+
+  .proof-sec { margin-top: 4.5rem; }
+  .proof {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    padding: 2rem 1.5rem;
+  }
+  .stat { text-align: center; }
+  .n { font-size: 1.95rem; font-weight: 750; letter-spacing: -0.03em; }
+  .l { font-size: 0.92rem; font-weight: 600; }
+  .s { font-size: 0.79rem; color: var(--text-faint); }
+  .proof-note { text-align: center; color: var(--text-faint); font-size: 0.85rem; margin: 0.9rem 0 0; }
+
+  .final { margin-top: 5rem; text-align: center; }
+  .final h2 { font-size: 1.75rem; margin: 0 0 0.6rem; }
+  .final p { color: var(--text-dim); max-width: 56ch; margin: 0 auto 1.6rem; }
+  .final .cta { justify-content: center; }
+</style>

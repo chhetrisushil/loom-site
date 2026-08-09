@@ -1,0 +1,47 @@
+---
+import SiteHeader from "../components/SiteHeader.astro";
+import "../styles/global.css";
+
+interface Props { title: string; description?: string; }
+const { title, description = "Loom — the execution kernel for agentic applications. Durable, replayable, plain TypeScript." } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <script is:inline>
+      // Before first paint: no theme flash.
+      try {
+        const saved = localStorage.getItem("loom-theme");
+        const dark = saved ? saved === "dark" : !window.matchMedia("(prefers-color-scheme: light)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main"><slot /></main>
+    <footer class="ft">
+      <div class="shell ft-in">
+        <p>Loom — an execution kernel for agentic applications.</p>
+        <p class="dim">Docs generated from the loom repository. Apache-2.0.</p>
+      </div>
+    </footer>
+    <style>
+      .ft { border-top: 1px solid var(--border); margin-top: 5rem; padding: 2.25rem 0; }
+      .ft-in { display: flex; flex-wrap: wrap; gap: 0.35rem 2rem; justify-content: space-between; font-size: 0.87rem; }
+      .ft p { margin: 0; }
+      .dim { color: var(--text-faint); }
+    </style>
+  </body>
+</html>
