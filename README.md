@@ -28,6 +28,29 @@ pnpm build      # syncs docs, then emits dist/
 `pnpm sync` alone refreshes the synced markdown. Point the sync at a checkout elsewhere with
 `LOOM_REPO=/path/to/loom pnpm build`.
 
+## Search
+
+Full-text search over every documentation page, reachable from the header on any page or with
+`/` (`⌘K`/`Ctrl-K` also works). No service, no API key, no network call off the site.
+
+[Pagefind](https://pagefind.app) indexes the **built HTML** — so the index is generated after
+`astro build`, by `scripts/index-search.mjs`, which `pnpm build` chains automatically. It ships a
+chunked index: the browser downloads only the fragments a query actually touches, rather than
+one JSON blob of all 96 documents up front. `src/components/Search.astro` drives Pagefind's JS
+API directly and renders results in the site's own design tokens, so none of Pagefind's stock UI
+bundles are published.
+
+Two consequences worth knowing:
+
+- **The index only exists after a build.** `scripts/index-search.mjs` therefore mirrors the
+  bundle into `public/pagefind/` (gitignored) so `astro dev` serves it too. Run `pnpm build` once
+  before `pnpm dev`, or search will report the index as unavailable. `pnpm index` alone
+  re-indexes an existing `dist/`.
+- **What is searchable is what carries `data-pagefind-body`** — currently the `<article>` in
+  `src/pages/docs/[...slug].astro`, and nothing else. That is what keeps the landing page, the
+  docs hub and the ADR index out of the results, and keeps the header, sidebar and footer from
+  being indexed 96 times over. Results are filterable by the same sections the sidebar uses.
+
 ## Publication boundary — read before adding pages
 
 `loom` is a **private** repository. This site is **public**, and everything it publishes is
@@ -58,26 +81,30 @@ Because the docs source is private, CI needs a token that can read it:
 2. Add it to this repo as the secret **`LOOM_DOCS_TOKEN`**.
 3. In **Settings → Pages**, set **Source: GitHub Actions**.
 
-The workflow fails loudly if fewer than 50 pages build — a site that deployed with no
-documentation is worse than one that failed to deploy.
+The workflow fails loudly if fewer than 50 pages build, or if fewer than 50 are indexed for
+search — a site that deployed with no documentation is worse than one that failed to deploy, and
+a search box that finds nothing reads as a broken site rather than a failed build.
 
 ## Structure
 
 ```
 scripts/sync-docs.mjs        the publication boundary + link rewriting
+scripts/index-search.mjs     builds the Pagefind index over dist/, mirrors it into public/
 src/pages/index.astro        landing page
 src/pages/docs/index.astro   docs hub
 src/pages/docs/adr/index.astro   filterable index of the decision records
 src/pages/docs/[...slug].astro   docs shell: sidebar, content, on-this-page rail
 src/layouts/Base.astro       shell, theme bootstrap, footer
 src/components/SiteHeader.astro  header, nav, theme toggle
+src/components/Search.astro  search trigger + modal, driving the Pagefind JS API
 src/styles/global.css        design tokens (dark-first, light is a real second theme)
 ```
 
 ## Changing the hosting URL
 
 `astro.config.mjs` holds `site` and `base`. Serving from a user site or a custom domain is a
-one-line change to `base` (`"/"`), plus a `public/CNAME` for a custom domain.
+one-line change to `base` (`"/"`), plus a `public/CNAME` for a custom domain. Search follows
+automatically — it reads `import.meta.env.BASE_URL` rather than hard-coding the prefix.
 
 ## Licence
 

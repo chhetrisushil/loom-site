@@ -8,7 +8,8 @@
   "scripts": {
     "sync": "node scripts/sync-docs.mjs",
     "dev": "pnpm sync && astro dev",
-    "build": "pnpm sync && astro build",
+    "build": "pnpm sync && astro build && pnpm index",
+    "index": "node scripts/index-search.mjs",
     "preview": "astro preview",
     "check": "astro check"
   },
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.185.4",
+    "pagefind": "^1.5.2",
     "typescript": "^5.6.3"
   }
 }

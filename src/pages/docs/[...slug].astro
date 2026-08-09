@@ -54,7 +54,18 @@ const repoUrl = entry.data.source
       </nav>
     </aside>
 
-    <article class="doc">
+    {/*
+      `data-pagefind-body` scopes the search index to the article — chrome (header, sidebar,
+      footer) would otherwise be indexed 96 times over. It also opts the *page* in: with the
+      attribute present anywhere on the site, Pagefind indexes only pages that carry it, which is
+      how the landing page and the two index pages stay out of the results.
+    */}
+    <article
+      class="doc"
+      data-pagefind-body
+      data-pagefind-meta={`section:${entry.data.section}`}
+      data-pagefind-filter={`section:${entry.data.section}`}
+    >
       <p class="crumb">{entry.data.section}</p>
       <h1>{entry.data.title}</h1>
       <div class="prose"><Content /></div>
