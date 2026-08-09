@@ -52,16 +52,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 </dialog>
 
 <script>
-  // `base` is a build-time value, handed to this bundled script through the trigger's data
-  // attribute — one source of truth with astro.config.mjs.
-  const trigger = document.getElementById("s-open") as HTMLButtonElement | null;
-  const modal = document.getElementById("s-modal") as HTMLDialogElement | null;
-  const input = document.getElementById("s-input") as HTMLInputElement | null;
-  const results = document.getElementById("s-results") as HTMLDivElement | null;
-  const filterBar = document.getElementById("s-filters") as HTMLDivElement | null;
-  const closeBtn = document.getElementById("s-close");
-
-  if (trigger && modal && input && results && filterBar) {
+  // The elements are taken as parameters rather than read inside: a `null` check at the call site
+  // does not narrow through into nested closures, so every use below would otherwise be
+  // `possibly null` to the type checker.
+  function init(
+    trigger: HTMLButtonElement,
+    modal: HTMLDialogElement,
+    input: HTMLInputElement,
+    results: HTMLDivElement,
+    filterBar: HTMLDivElement,
+    closeBtn: HTMLElement | null,
+  ) {
+    // `base` is a build-time value, handed to this bundled script through the trigger's data
+    // attribute — one source of truth with astro.config.mjs.
     const base = trigger.dataset.base ?? "";
 
     // Sidebar reading order, reused so the filter chips are not alphabetical either.
@@ -290,6 +293,16 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
         open();
       }
     });
+  }
+
+  const trigger = document.getElementById("s-open") as HTMLButtonElement | null;
+  const modal = document.getElementById("s-modal") as HTMLDialogElement | null;
+  const input = document.getElementById("s-input") as HTMLInputElement | null;
+  const results = document.getElementById("s-results") as HTMLDivElement | null;
+  const filterBar = document.getElementById("s-filters") as HTMLDivElement | null;
+
+  if (trigger && modal && input && results && filterBar) {
+    init(trigger, modal, input, results, filterBar, document.getElementById("s-close"));
   }
 </script>
 

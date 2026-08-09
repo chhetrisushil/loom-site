@@ -55,6 +55,10 @@ jobs:
         env:
           LOOM_REPO: ${{ github.workspace }}/loom
 
+      # After the build: `astro check` needs the synced content and generated types to exist.
+      - run: pnpm check
+        working-directory: loom-site
+
       # A build that silently produced no docs is worse than a failed one. The same goes for the
       # search index: a search box that finds nothing looks like a broken site, not a failed build.
       - name: Verify the build published documentation
