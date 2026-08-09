@@ -163,7 +163,7 @@ const proof = [
   if (canvas instanceof HTMLCanvasElement) {
     const boot = () =>
       import("../lib/weave.js").then(({ mountWeave }) => {
-        if (mountWeave(canvas)) canvas.dataset.on = "true";
+        if (mountWeave(canvas, { parallax: 0.0014 })) canvas.dataset.on = "true";
       });
     "requestIdleCallback" in window
       ? requestIdleCallback(boot, { timeout: 2500 })
@@ -175,23 +175,26 @@ const proof = [
   .hero { position: relative; isolation: isolate; padding: 5.5rem 0 4rem; overflow: hidden; }
   #weave {
     position: absolute;
-    inset: -1rem -6% -3rem auto;
-    width: 62%;
+    /* Anchored to the CONTENT column, not the viewport: on a wide display the column is a
+       narrow centred strip, and a viewport-relative canvas drifts off-screen right. */
+    left: 50%;
+    transform: translateX(-12%);
+    width: min(1180px, 90vw);
+    top: -1rem;
+    /* Ends above the hero's clip so the fade completes rather than being chopped. */
+    height: min(520px, 76%);
     z-index: -1;
     opacity: 0;
     transition: opacity 1.4s ease;
     pointer-events: none;
-    /* Offset right so the text column stays clean, and faded on every edge it could reach —
-       decoration must never make the copy harder to read. */
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 42%),
-      linear-gradient(to bottom, transparent, #000 30%, #000 74%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 40%),
+      linear-gradient(to bottom, transparent 2%, #000 32%, #000 60%, transparent 94%);
     -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to right, transparent, #000 42%),
-      linear-gradient(to bottom, transparent, #000 30%, #000 74%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 40%),
+      linear-gradient(to bottom, transparent 2%, #000 32%, #000 60%, transparent 94%);
     mask-composite: intersect;
   }
   #weave[data-on] { opacity: 0.62; }
-  /* Below the text/graphic split there is nowhere for it to go without sitting under copy. */
   @media (max-width: 900px) { #weave { display: none; } }
   .glow {
     position: absolute;
