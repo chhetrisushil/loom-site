@@ -72,7 +72,7 @@ function targetFor(path) {
  * Silently leaving a dead link would be worse than saying "this lives in the repo".
  */
 function rewriteLinks(body, fromDir) {
-  return body.replace(/\[([^\]]+)\]\((?!https?:|#|mailto:)([^)#\s]+)(#[^)\s]*)?\)/g, (all, text, href, hash = "") => {
+  return body.replace(/\[([^\]]+)\]\((?!https?:|#|mailto:)([^)#\s]+)(#[^)\s]*)?\)/g, (_all, text, href, hash = "") => {
     const rel = fromDir ? `${fromDir}/${href}`.replace(/[^/]+\/\.\.\//g, "") : href;
     const target = targetFor(rel) ?? targetFor(href);
     if (target) return `[${text}](${target}${hash})`;
