@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
+import Mermaid from "../../components/Mermaid.astro";
 import Base from "../../layouts/Base.astro";
 
 export async function getStaticPaths() {
@@ -57,6 +58,7 @@ const repoUrl = entry.data.source
       <p class="crumb">{entry.data.section}</p>
       <h1>{entry.data.title}</h1>
       <div class="prose"><Content /></div>
+      <Mermaid />
       {repoUrl && (
         <p class="edit">
           Source: <a href={repoUrl} rel="noopener">{entry.data.source}</a> in the loom repository.

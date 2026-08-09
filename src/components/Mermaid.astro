@@ -1,0 +1,99 @@
+---
+// Render ```mermaid fences as diagrams.
+//
+// Astro hands mermaid fences to Shiki like any other language, so they arrive as syntax-
+// highlighted code blocks — correct-looking markup for the wrong intent. This finds them by
+// their `data-language="mermaid"` attribute and swaps each for a rendered SVG.
+//
+// Client-side rather than at build time: build-time rendering (rehype-mermaid) needs a headless
+// browser in CI, which is a heavy dependency for a static docs site. The cost is bounded
+// instead — mermaid is ~500 KB, so it loads ONLY on pages that actually contain a diagram, and
+// only after first paint.
+---
+
+<script>
+  const blocks = Array.from(
+    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]')
+  );
+
+  if (blocks.length > 0) {
+    // textContent, not innerText: Shiki has wrapped every token in a span, and innerText would
+    // collapse the whitespace that mermaid's grammar depends on.
+    const sources = blocks.map((b) => b.textContent ?? "");
+
+    const isLight = () => document.documentElement.dataset.theme === "light";
+
+    const render = async () => {
+      const { default: mermaid } = await import("mermaid");
+
+      const draw = async () => {
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict", // diagrams come from our own docs, but strict costs nothing
+          theme: isLight() ? "neutral" : "dark",
+          fontFamily: "ui-sans-serif, system-ui, sans-serif",
+          themeVariables: isLight()
+            ? { background: "#f7f8fa", primaryColor: "#f2f4f7", lineColor: "#4d5768" }
+            : { background: "#11141b", primaryColor: "#1e2430", lineColor: "#a3adbf" },
+        });
+
+        for (const [i, block] of blocks.entries()) {
+          const host = block.parentElement;
+          if (!host) continue;
+          try {
+            const { svg } = await mermaid.render(`mmd-${i}-${Date.now()}`, sources[i] as string);
+            const figure = document.createElement("figure");
+            figure.className = "mermaid-figure";
+            figure.innerHTML = svg;
+            block.replaceWith(figure);
+            blocks[i] = figure as unknown as HTMLElement;
+          } catch (err) {
+            // A diagram that fails to parse must not take the page with it: leave the source
+            // block in place, visibly, rather than showing a blank gap.
+            block.dataset.mermaidError = "true";
+            console.warn("mermaid: could not render a diagram, leaving the source visible", err);
+          }
+        }
+      };
+
+      await draw();
+
+      // The theme toggle does not reload, so redraw from the retained sources on change.
+      new MutationObserver(async () => {
+        for (const [i, node] of blocks.entries()) {
+          const pre = document.createElement("pre");
+          pre.dataset.language = "mermaid";
+          pre.textContent = sources[i] as string;
+          node.replaceWith(pre);
+          blocks[i] = pre;
+        }
+        await draw();
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    };
+
+    "requestIdleCallback" in window
+      ? requestIdleCallback(() => void render(), { timeout: 2000 })
+      : setTimeout(() => void render(), 200);
+  }
+</script>
+
+<style is:global>
+  .mermaid-figure {
+    margin: 1.4rem 0;
+    padding: 1.1rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    /* Wide diagrams scroll inside their own box rather than the page. */
+    overflow-x: auto;
+    text-align: center;
+  }
+  .mermaid-figure svg {
+    max-width: 100%;
+    height: auto;
+  }
+  /* A diagram we could not parse stays visible as source, flagged rather than silently gone. */
+  pre[data-mermaid-error] {
+    border-color: var(--accent);
+  }
+</style>
