@@ -96,6 +96,7 @@ const proof = [
       <p class="sub">Plain TypeScript. No DSL, no YAML, no state machines.</p>
     </div>
     <div class="glow" aria-hidden="true"></div>
+    <canvas id="weave" aria-hidden="true"></canvas>
   </section>
 
   <section class="shell code-sec">
@@ -154,8 +155,44 @@ const proof = [
   </section>
 </Base>
 
+<script>
+  // Deferred on purpose: three is ~85 KB gzipped, and nothing above the fold depends on it.
+  // requestIdleCallback keeps it off the critical path entirely; the CSS glow carries the hero
+  // until it arrives, and remains the whole visual if WebGL is unavailable.
+  const canvas = document.getElementById("weave");
+  if (canvas instanceof HTMLCanvasElement) {
+    const boot = () =>
+      import("../lib/weave.js").then(({ mountWeave }) => {
+        if (mountWeave(canvas)) canvas.dataset.on = "true";
+      });
+    "requestIdleCallback" in window
+      ? requestIdleCallback(boot, { timeout: 2500 })
+      : setTimeout(boot, 400);
+  }
+</script>
+
 <style>
   .hero { position: relative; isolation: isolate; padding: 5.5rem 0 4rem; overflow: hidden; }
+  #weave {
+    position: absolute;
+    inset: -1rem -6% -3rem auto;
+    width: 62%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    pointer-events: none;
+    /* Offset right so the text column stays clean, and faded on every edge it could reach —
+       decoration must never make the copy harder to read. */
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 42%),
+      linear-gradient(to bottom, transparent, #000 30%, #000 74%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 42%),
+      linear-gradient(to bottom, transparent, #000 30%, #000 74%, transparent);
+    mask-composite: intersect;
+  }
+  #weave[data-on] { opacity: 0.62; }
+  /* Below the text/graphic split there is nowhere for it to go without sitting under copy. */
+  @media (max-width: 900px) { #weave { display: none; } }
   .glow {
     position: absolute;
     inset: -40% 0 auto 0;
