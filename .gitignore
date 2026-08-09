@@ -4,3 +4,5 @@ dist/
 .DS_Store
 # Synced from the sibling ../loom checkout by scripts/sync-docs.mjs.
 src/content/docs/
+# Search index, mirrored out of dist/ by scripts/index-search.mjs so dev can serve it.
+public/pagefind/

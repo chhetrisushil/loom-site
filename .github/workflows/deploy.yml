@@ -55,7 +55,8 @@ jobs:
         env:
           LOOM_REPO: ${{ github.workspace }}/loom
 
-      # A build that silently produced no docs is worse than a failed one.
+      # A build that silently produced no docs is worse than a failed one. The same goes for the
+      # search index: a search box that finds nothing looks like a broken site, not a failed build.
       - name: Verify the build published documentation
         working-directory: loom-site
         run: |
@@ -63,6 +64,10 @@ jobs:
           echo "built $pages pages"
           test "$pages" -gt 50 || { echo "::error::only $pages pages built — docs sync likely failed"; exit 1; }
           test ! -d dist/docs/requirements || { echo "::error::internal requirements docs leaked into the build"; exit 1; }
+          test -f dist/pagefind/pagefind-entry.json || { echo "::error::no search index — pagefind did not run"; exit 1; }
+          indexed=$(find dist/pagefind/fragment -type f | wc -l)
+          echo "indexed $indexed pages for search"
+          test "$indexed" -gt 50 || { echo "::error::only $indexed pages indexed — search would ship empty"; exit 1; }
 
       - uses: actions/upload-pages-artifact@v3
         with:
