@@ -12,7 +12,14 @@ export default defineConfig({
   trailingSlash: "ignore",
   integrations: [mdx(), sitemap()],
   markdown: {
-    shikiConfig: { theme: "github-dark-default", wrap: false },
+    shikiConfig: {
+      // Both themes are emitted as CSS variables per token (defaultColor: false means Shiki
+      // writes no `color`), and global.css picks one from `data-theme`. A single theme would
+      // be unreadable in the other mode — dark token colours on a light block.
+      themes: { light: "github-light", dark: "github-dark-default" },
+      defaultColor: false,
+      wrap: false,
+    },
   },
   build: { format: "directory" },
 });

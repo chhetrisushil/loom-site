@@ -106,7 +106,12 @@ const proof = [
         declared once and enforced before anything is written to the log.
       </p>
     </div>
-    <Code code={sample} lang="ts" theme="github-dark-default" />
+    <Code
+      code={sample}
+      lang="ts"
+      themes={{ light: "github-light", dark: "github-dark-default" }}
+      defaultColor={false}
+    />
   </section>
 
   <section class="shell">
