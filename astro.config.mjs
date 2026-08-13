@@ -1,14 +1,16 @@
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
+import { BASE } from "./site.config.mjs";
 
 // Project-site hosting: served from https://chhetrisushil.github.io/loom-site/, so every
-// absolute path needs the base prefix. Astro handles that for `<a href>` written through
-// `withBase()` and for its own asset URLs. Change `base` to "/" if this ever moves to a user
-// site or a custom domain — that is the single switch.
+// absolute path needs the base prefix. Astro applies it to its own asset URLs and to anything
+// written through `import.meta.env.BASE_URL` — but NOT to links inside markdown content, which
+// `scripts/sync-docs.mjs` prefixes itself from the same `BASE`. Change it in `site.config.mjs`;
+// that is the single switch.
 export default defineConfig({
   site: "https://chhetrisushil.github.io",
-  base: "/loom-site",
+  base: BASE,
   trailingSlash: "ignore",
   integrations: [mdx(), sitemap()],
   markdown: {

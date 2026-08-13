@@ -2,7 +2,7 @@
   "name": "loom-site",
   "version": "0.0.1",
   "private": true,
-  "description": "Documentation site for Loom — the execution kernel for agentic applications.",
+  "description": "Documentation site for Loom \u2014 the execution kernel for agentic applications.",
   "type": "module",
   "packageManager": "pnpm@9.14.4",
   "scripts": {
@@ -11,7 +11,7 @@
     "build": "pnpm sync && astro build && pnpm index",
     "index": "node scripts/index-search.mjs",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check && node scripts/check-links.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.3",

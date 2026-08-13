@@ -13,6 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { BASE } from "../site.config.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, "..");
@@ -47,6 +48,24 @@ const DIRS = [
   { dir: "adr", section: "Decision records", prefix: "adr" },
 ];
 
+/**
+ * The id Astro will give a content file — and therefore the URL segment.
+ *
+ * Astro slugifies each path segment (lowercase, drop anything outside [\w\s-], spaces to
+ * hyphens), so `0016-loom-2.0-execution-runtime-and-decision-seam.md` is served at
+ * `…/0016-loom-20-execution-runtime-and-decision-seam`. Deriving the link target from the
+ * FILENAME instead left 18 links to that ADR pointing at a page that is never built.
+ *
+ * Applying it here — to the emitted filename as well as to the link — makes the two agree by
+ * construction: every name this writes already matches [a-z0-9-]+, on which Astro's slugify is
+ * the identity, so there is no second transformation left to disagree with.
+ */
+const slugify = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s/g, "-");
+
 const titleFromBody = (body, fallback) => {
   const m = body.match(/^#\s+(.+)$/m);
   return m ? m[1].trim().replace(/`/g, "") : fallback;
@@ -55,10 +74,13 @@ const titleFromBody = (body, fallback) => {
 /** loom-repo doc path → site URL, or null when the target is not published. */
 function targetFor(path) {
   const clean = path.replace(/^\.\//, "");
-  if (PAGES[clean]) return `/docs/${PAGES[clean].slug}`;
+  // BASE, not a bare "/docs/…": Astro prefixes its OWN URLs with the base, but a link written
+  // into markdown reaches the HTML verbatim. Without this the site emits absolute links to a
+  // different origin path entirely — they 404, and nothing in the build notices.
+  if (PAGES[clean]) return `${BASE}/docs/${PAGES[clean].slug}`;
   for (const { dir, prefix } of DIRS) {
     const m = clean.match(new RegExp(`^(?:\\.\\./)?${dir}/(.+)\\.md$`));
-    if (m) return `/docs/${prefix}/${m[1]}`;
+    if (m) return `${BASE}/docs/${prefix}/${slugify(m[1])}`;
   }
   return null;
 }
@@ -125,7 +147,7 @@ function main() {
       const base = file.replace(/\.md$/, "");
       // ADRs sort by their number; everything else alphabetically.
       const num = base.match(/^(\d{4})/);
-      emit(join(OUT, prefix, `${base}.md`), {
+      emit(join(OUT, prefix, `${slugify(base)}.md`), {
         title: titleFromBody(raw, base),
         section,
         order: num ? Number(num[1]) : 0,

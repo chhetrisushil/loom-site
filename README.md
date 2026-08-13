@@ -36,7 +36,7 @@ Full-text search over every documentation page, reachable from the header on any
 [Pagefind](https://pagefind.app) indexes the **built HTML** — so the index is generated after
 `astro build`, by `scripts/index-search.mjs`, which `pnpm build` chains automatically. It ships a
 chunked index: the browser downloads only the fragments a query actually touches, rather than
-one JSON blob of all 96 documents up front. `src/components/Search.astro` drives Pagefind's JS
+one JSON blob of every document up front. `src/components/Search.astro` drives Pagefind's JS
 API directly and renders results in the site's own design tokens, so none of Pagefind's stock UI
 bundles are published.
 
@@ -49,7 +49,7 @@ Two consequences worth knowing:
 - **What is searchable is what carries `data-pagefind-body`** — currently the `<article>` in
   `src/pages/docs/[...slug].astro`, and nothing else. That is what keeps the landing page, the
   docs hub and the ADR index out of the results, and keeps the header, sidebar and footer from
-  being indexed 96 times over. Results are filterable by the same sections the sidebar uses.
+  being indexed once per page. Results are filterable by the same sections the sidebar uses.
 
 ## Publication boundary — read before adding pages
 
@@ -70,6 +70,21 @@ denylist fails open.
 
 The deploy workflow asserts this too, failing the build if `dist/docs/requirements` ever exists.
 
+## Checks
+
+`pnpm check` runs two things, and CI runs it after every build:
+
+- **`astro check`** — types and component diagnostics.
+- **`scripts/check-links.mjs`** — every internal `href` in the *built* `dist/` resolves to a page
+  that was actually built.
+
+The second exists because two link bugs shipped and nothing noticed. `astro check` never opens the
+emitted HTML, and a markdown link is only text until it does: (1) synced doc links were written
+without the `/loom-site` base, so 365 of them addressed a different repo's user site; (2) link
+targets were derived from the source **filename** while Astro derives the route from a **slugified**
+id, so every link to `0016-loom-2.0-…` pointed at a page that is never built. Both are invisible in
+review and obvious the moment you read `dist/`.
+
 ## Deployment
 
 `.github/workflows/deploy.yml` builds and deploys on every push to `main`, and can be triggered
@@ -88,8 +103,10 @@ a search box that finds nothing reads as a broken site rather than a failed buil
 ## Structure
 
 ```
+site.config.mjs              BASE — the deployment prefix, written once
 scripts/sync-docs.mjs        the publication boundary + link rewriting
 scripts/index-search.mjs     builds the Pagefind index over dist/, mirrors it into public/
+scripts/check-links.mjs      asserts every internal link in dist/ resolves (part of `pnpm check`)
 src/pages/index.astro        landing page
 src/pages/docs/index.astro   docs hub
 src/pages/docs/adr/index.astro   filterable index of the decision records
@@ -102,9 +119,12 @@ src/styles/global.css        design tokens (dark-first, light is a real second t
 
 ## Changing the hosting URL
 
-`astro.config.mjs` holds `site` and `base`. Serving from a user site or a custom domain is a
-one-line change to `base` (`"/"`), plus a `public/CNAME` for a custom domain. Search follows
-automatically — it reads `import.meta.env.BASE_URL` rather than hard-coding the prefix.
+`site.config.mjs` holds `BASE`, and it is the **only** place the prefix is written: `astro.config.mjs`
+imports it, and so does `scripts/sync-docs.mjs`, which has to prefix links itself because Astro does
+not touch URLs written inside markdown. Serving from a user site or a custom domain is a one-line
+change there (`""`), plus a `public/CNAME` for a custom domain. Everything else follows — the site
+chrome reads `import.meta.env.BASE_URL`, and `scripts/check-links.mjs` fails the build if any emitted
+link disagrees.
 
 ## Licence
 

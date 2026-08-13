@@ -22,7 +22,9 @@ const sections = ORDER.map((name) => ({
     .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title)),
 })).filter((s) => s.items.length > 0);
 
-// Decision records are 77 entries — collapsed by default so they never bury the guides.
+// Decision records outnumber every other section several times over (the count is rendered
+// beside the heading, so it never needs restating here) — collapsed by default so they never
+// bury the guides.
 const isBulk = (name: string) => name === "Decision records";
 const inBulk = isBulk(entry.data.section);
 
