@@ -11,7 +11,7 @@
     "build": "pnpm sync && astro build && pnpm index",
     "index": "node scripts/index-search.mjs",
     "preview": "astro preview",
-    "check": "astro check && node scripts/check-links.mjs"
+    "check": "node scripts/check-source-hygiene.mjs && astro check && node scripts/check-links.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.3",
