@@ -1,5 +1,6 @@
 ---
 import { Code } from "astro:components";
+import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -67,10 +68,16 @@ const features = [
   },
 ];
 
+// COUNTED, not typed. This read "77" while the repo carried 90 — a stale number on the most
+// visible page of the site, and the one claim here that changes every time a decision is
+// recorded. The ADR index page already derives its own count this way; the landing page was
+// the copy nobody thought of as data.
+const adrCount = (await getCollection("docs")).filter((d) => d.id.startsWith("adr/")).length;
+
 const proof = [
   { n: "~1.1M", l: "transient calls/sec", s: "per process, measured" },
   { n: "~5.7K", l: "durable exec/sec", s: "1-step flow, measured" },
-  { n: "77", l: "decision records", s: "every trade-off written down" },
+  { n: `${adrCount}`, l: "decision records", s: "every trade-off written down" },
   { n: "0", l: "kernel hooks for plugins", s: "existing seams only" },
 ];
 ---
