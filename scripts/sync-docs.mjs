@@ -34,6 +34,7 @@ const PAGES = {
   "scaling.md": { slug: "scaling", title: "Scaling", section: "Guides", order: 3 },
   "benchmarks.md": { slug: "benchmarks", title: "Benchmarks", section: "Guides", order: 4 },
   "transient-interpreter.md": { slug: "transient-interpreter", title: "Transient interpreter", section: "Guides", order: 5 },
+  "composed-surfaces.md": { slug: "composed-surfaces", title: "Composed surfaces", section: "Guides", order: 6 },
 
   "architecture.md": { slug: "architecture", title: "Architecture", section: "Reference", order: 0 },
   "data-classification.md": { slug: "data-classification", title: "Data classification", section: "Reference", order: 1 },
