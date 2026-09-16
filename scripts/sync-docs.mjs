@@ -28,6 +28,9 @@ const PAGES = {
   "usage.md": { slug: "usage", title: "Usage — building an app", section: "Start here", order: 2 },
   "examples.md": { slug: "examples", title: "Examples", section: "Start here", order: 3 },
 
+  "cheatsheet-features.md": { slug: "cheatsheet-features", title: "Cheatsheet — features", section: "Start here", order: 4 },
+  "cheatsheet-dx.md": { slug: "cheatsheet-dx", title: "Cheatsheet — working with Loom", section: "Start here", order: 5 },
+
   "user-guide.md": { slug: "user-guide", title: "User guide", section: "Guides", order: 0 },
   "usage-cli.md": { slug: "cli", title: "CLI reference", section: "Guides", order: 1 },
   "plugins.md": { slug: "plugins", title: "Plugins", section: "Guides", order: 2 },
