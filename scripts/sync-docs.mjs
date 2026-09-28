@@ -12,9 +12,11 @@
 //
 // loom-ui — a second private sibling repo, a UI framework built on loom — is synced the same
 // way, into its own "loom-ui" section: LOOM_UI_PAGES below is an explicit allowlist of its
-// README plus per-package READMEs (only those that exist are published). Its README names one
-// real consumer, genUI, which is itself a private product; that section is stripped on the way
-// out (see `stripSection`) and `assertNoGenui` fails the build if the name leaks anywhere else.
+// README plus per-package READMEs (only those that exist are published). Its README's
+// `## Consumers` section names private products, so it is stripped on the way out (see
+// `stripSection`), and `assertNoPrivateLeak` fails the build if a published page still carries
+// that heading or links into a private repository. loom-ui's own genericity fitness test keeps
+// consumer names out of the rest of its docs; this is the publication-side backstop.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -79,25 +81,28 @@ const LOOM_UI_PAGES = {
   },
 };
 
-// A word-boundary match so "genuine"/"ingenuity" never trip this — but "genUI", "GenUI", "genui-*"
-// all do, and so does the literal CSS-class prefix "gx-" genUI's own components use.
-const GENUI_PATTERN = /\bgenui\b|gx-/i;
+// A published loom-ui page must not reintroduce the stripped consumer list (heading), nor link
+// into a private repository on the owner's account — the site's own "Source:" footer is added by
+// the page template, not the page body, so it is not affected by this check.
+const PRIVATE_LEAK_PATTERNS = [
+  { re: /^#{1,6}\s+Consumers\s*$/im, why: "a Consumers section survived the strip" },
+  { re: /github\.com\/chhetrisushil\/(?!loom-site\b)[\w.-]+/i, why: "a link into a private repository" },
+];
 
-/** Fails the build outright: loom-ui's docs must never surface its private consumer. */
-function assertNoGenui(content, where) {
-  const m = content.match(GENUI_PATTERN);
-  if (m) {
-    console.error(
-      `sync-docs: refusing to publish ${where} — found "${m[0]}" (genUI is a private product; ` +
-        `strip it from the loom-ui source, or from the sync script's rewriting, before publishing)`
-    );
-    process.exit(1);
+/** Fails the build outright: a published loom-ui page must not surface private consumers. */
+function assertNoPrivateLeak(content, where) {
+  for (const { re, why } of PRIVATE_LEAK_PATTERNS) {
+    const m = content.match(re);
+    if (m) {
+      console.error(`sync-docs: refusing to publish ${where} — ${why}: "${m[0]}"`);
+      process.exit(1);
+    }
   }
 }
 
 /**
  * Remove a markdown section by its exact heading text, from that heading up to (not including)
- * the next heading of the same or shallower level, or EOF. loom-ui's README names genUI only
+ * the next heading of the same or shallower level, or EOF. loom-ui's README names private consumers only
  * under "## Consumers" — nothing else in the page needs redacting.
  */
 function stripSection(body, headingText) {
@@ -231,7 +236,7 @@ function syncLoomUi() {
       join(OUT, `${meta.slug}.md`),
       { title: meta.title, section: LOOM_UI_SECTION, order: meta.order, source: file, repo: "loom-ui" },
       body,
-      { guard: (content, where) => assertNoGenui(content, where) }
+      { guard: (content, where) => assertNoPrivateLeak(content, where) }
     );
     count++;
   }

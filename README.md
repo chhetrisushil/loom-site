@@ -72,11 +72,11 @@ A new file added to `loom/docs` (or a new loom-ui package) is **private by defau
 on the site only when someone adds it to `PAGES` / `LOOM_UI_PAGES` in the sync script. Keep it
 that way: an allowlist fails closed, a denylist fails open.
 
-loom-ui's README names one real consumer, genUI — itself a private product. Its `## Consumers`
-section is stripped out during sync (heading to next heading, so nothing further down that section
-survives), and `sync-docs.mjs` fails the build outright if the strings `genUI`, `genui` or `gx-`
-turn up anywhere in a published loom-ui page, as a backstop against a future edit reintroducing it
-somewhere else in the page.
+loom-ui's README ends with a `## Consumers` section that names private products. It is stripped
+during sync (heading to next heading of the same level), and `sync-docs.mjs` fails the build if a
+published loom-ui page still carries that heading or links into a private repository — a backstop
+against a future edit reintroducing it elsewhere. loom-ui's own genericity fitness test keeps
+consumer names out of the rest of its docs.
 
 The deploy workflow asserts the requirements-docs exclusion too, failing the build if
 `dist/docs/requirements` ever exists, if `dist/docs/loom-ui` is missing, or if any of those three
