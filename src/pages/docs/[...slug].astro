@@ -14,7 +14,7 @@ const { Content, headings } = await render(entry);
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // Sidebar sections in a deliberate reading order, not alphabetical.
-const ORDER = ["Start here", "Guides", "Reference", "Specification", "Decision records"];
+const ORDER = ["Start here", "Guides", "loom-ui", "Reference", "Specification", "Decision records"];
 const sections = ORDER.map((name) => ({
   name,
   items: docs
@@ -30,9 +30,12 @@ const inBulk = isBulk(entry.data.section);
 
 // h2/h3 only: h4+ makes the rail unreadable on long pages like the user guide.
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
-const repoUrl = entry.data.source
-  ? `https://github.com/chhetrisushil/loom/blob/main/${entry.data.source}`
-  : undefined;
+const REPOS = {
+  loom: { label: "loom", blobUrl: "https://github.com/chhetrisushil/loom/blob/main/" },
+  "loom-ui": { label: "loom-ui", blobUrl: "https://github.com/chhetrisushil/loom-ui/blob/main/" },
+} as const;
+const repo = REPOS[entry.data.repo] ?? REPOS.loom;
+const repoUrl = entry.data.source ? `${repo.blobUrl}${entry.data.source}` : undefined;
 ---
 
 <Base title={`${entry.data.title} — Loom`}>
@@ -74,7 +77,7 @@ const repoUrl = entry.data.source
       <Mermaid />
       {repoUrl && (
         <p class="edit">
-          Source: <a href={repoUrl} rel="noopener">{entry.data.source}</a> in the loom repository.
+          Source: <a href={repoUrl} rel="noopener">{entry.data.source}</a> in the {repo.label} repository.
         </p>
       )}
     </article>

@@ -3,7 +3,8 @@ import Search from "./Search.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const path = Astro.url.pathname;
-const isDocs = path.includes("/docs");
+const isLoomUi = path.includes("/docs/loom-ui");
+const isDocs = path.includes("/docs") && !isLoomUi;
 ---
 
 <header class="hdr">
@@ -31,6 +32,7 @@ const isDocs = path.includes("/docs");
       <a href={`${base}/docs/architecture`}>Architecture</a>
       <a href={`${base}/docs/adr`}>Decisions</a>
       <a href={`${base}/docs/examples`}>Examples</a>
+      <a href={`${base}/docs/loom-ui`} class={isLoomUi ? "on" : ""}>loom-ui</a>
     </nav>
 
     <div class="right">

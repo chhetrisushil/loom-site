@@ -5,28 +5,31 @@ The documentation site for **Loom** — the execution kernel for agentic applica
 Built with [Astro](https://astro.build), output is fully static, deployed to GitHub Pages at
 **https://chhetrisushil.github.io/loom-site/**.
 
-## The one thing to know: docs live in `../loom`
+## The one thing to know: docs live in `../loom` (and `../loom-ui`)
 
 This repo contains the *site* — design, layout, navigation, build. It contains **no
 documentation of its own**. Every page under `/docs` is synced at build time from the sibling
 [`loom`](https://github.com/chhetrisushil/loom) repository by `scripts/sync-docs.mjs`, and
-`src/content/docs/` is gitignored as a build artifact.
+`src/content/docs/` is gitignored as a build artifact. The `/docs/loom-ui` pages are synced the
+same way from a second sibling, [`loom-ui`](https://github.com/chhetrisushil/loom-ui) — a UI
+framework built on loom whose docs live in that repo for the same reason.
 
 That is deliberate. Docs are written and reviewed alongside the code they describe; a second
 copy here would drift from the first, which is precisely the failure this project has hit in
 every sibling repo.
 
 ```bash
-# clone loom next to this repo
+# clone loom and loom-ui next to this repo
 git clone git@github.com:chhetrisushil/loom.git ../loom
+git clone git@github.com:chhetrisushil/loom-ui.git ../loom-ui
 
 pnpm install
 pnpm dev        # syncs docs, then serves at http://localhost:4321/loom-site/
 pnpm build      # syncs docs, then emits dist/
 ```
 
-`pnpm sync` alone refreshes the synced markdown. Point the sync at a checkout elsewhere with
-`LOOM_REPO=/path/to/loom pnpm build`.
+`pnpm sync` alone refreshes the synced markdown. Point the sync at checkouts elsewhere with
+`LOOM_REPO=/path/to/loom LOOM_UI_REPO=/path/to/loom-ui pnpm build`.
 
 ## Search
 
@@ -53,8 +56,8 @@ Two consequences worth knowing:
 
 ## Publication boundary — read before adding pages
 
-`loom` is a **private** repository. This site is **public**, and everything it publishes is
-indexable and cacheable by third parties.
+`loom` and `loom-ui` are **private** repositories. This site is **public**, and everything it
+publishes is indexable and cacheable by third parties.
 
 `scripts/sync-docs.mjs` therefore publishes an **allowlist**, never a denylist:
 
@@ -63,12 +66,21 @@ indexable and cacheable by third parties.
 | The 15 curated top-level guides named in `PAGES` | `docs/requirements/` — internal evaluation and planning docs |
 | `docs/adr/` — architectural decision records | `docs/presentation/` — talk decks and presenter notes |
 | `docs/spec/` — the normative kernel specification | `docs/loom-2.0/` — historical working notes |
+| loom-ui's `README.md` plus each package's `README.md`, named in `LOOM_UI_PAGES` | loom-ui's `AGENTS.md` and everything else in that repo |
 
-A new file added to `loom/docs` is **private by default** — it appears on the site only when
-someone adds it to `PAGES` in the sync script. Keep it that way: an allowlist fails closed, a
-denylist fails open.
+A new file added to `loom/docs` (or a new loom-ui package) is **private by default** — it appears
+on the site only when someone adds it to `PAGES` / `LOOM_UI_PAGES` in the sync script. Keep it
+that way: an allowlist fails closed, a denylist fails open.
 
-The deploy workflow asserts this too, failing the build if `dist/docs/requirements` ever exists.
+loom-ui's README names one real consumer, genUI — itself a private product. Its `## Consumers`
+section is stripped out during sync (heading to next heading, so nothing further down that section
+survives), and `sync-docs.mjs` fails the build outright if the strings `genUI`, `genui` or `gx-`
+turn up anywhere in a published loom-ui page, as a backstop against a future edit reintroducing it
+somewhere else in the page.
+
+The deploy workflow asserts the requirements-docs exclusion too, failing the build if
+`dist/docs/requirements` ever exists, if `dist/docs/loom-ui` is missing, or if any of those three
+strings appear under `dist/docs/loom-ui`.
 
 ## Checks
 
@@ -90,9 +102,10 @@ review and obvious the moment you read `dist/`.
 `.github/workflows/deploy.yml` builds and deploys on every push to `main`, and can be triggered
 manually or by a `docs-updated` repository dispatch from the loom repo.
 
-Because the docs source is private, CI needs a token that can read it:
+Because the docs sources are private, CI needs a token that can read both of them:
 
-1. Create a fine-grained PAT with **`Contents: read`** on `chhetrisushil/loom`.
+1. Create a fine-grained PAT with **`Contents: read`** on **both** `chhetrisushil/loom` and
+   `chhetrisushil/loom-ui`.
 2. Add it to this repo as the secret **`LOOM_DOCS_TOKEN`**.
 3. In **Settings → Pages**, set **Source: GitHub Actions**.
 
