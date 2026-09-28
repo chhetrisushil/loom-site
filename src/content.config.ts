@@ -9,6 +9,9 @@ const docs = defineCollection({
     section: z.string(),
     order: z.number().default(0),
     source: z.string().optional(),
+    // Which sibling repo `source` is relative to — lets the "edit this page" link and its label
+    // point at the right GitHub repo (loom vs. loom-ui) instead of always assuming loom.
+    repo: z.enum(["loom", "loom-ui"]).default("loom"),
   }),
 });
 

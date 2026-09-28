@@ -4,10 +4,11 @@ import Base from "../../layouts/Base.astro";
 
 const docs = await getCollection("docs");
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const ORDER = ["Start here", "Guides", "Reference", "Specification", "Decision records"];
+const ORDER = ["Start here", "Guides", "loom-ui", "Reference", "Specification", "Decision records"];
 const BLURB: Record<string, string> = {
   "Start here": "Install it, build a first flow, suspend it for a human, resume it.",
   Guides: "Look up a feature — CLI, plugins, scaling, benchmarks, the transient interpreter.",
+  "loom-ui": "A generic UI framework built on loom: describe an experience as semantic nodes bound to data by handle, and loom-ui compiles it, per surface, to a loom Blueprint that loom's renderers draw. Covers the core Experience Model, hydration, the planner and the web/terminal renderers.",
   Reference: "Architecture, data classification, compliance and governance.",
   Specification: "The normative contract: what the kernel guarantees, and the evidence for it.",
   "Decision records": "Every architectural trade-off, written down with the reasoning and the rejected alternatives.",
