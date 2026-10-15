@@ -47,6 +47,15 @@ const PAGES = {
   "benchmarks.md": { slug: "benchmarks", title: "Benchmarks", section: "Guides", order: 4 },
   "transient-interpreter.md": { slug: "transient-interpreter", title: "Transient interpreter", section: "Guides", order: 5 },
   "composed-surfaces.md": { slug: "composed-surfaces", title: "Composed surfaces", section: "Guides", order: 6 },
+  "operations.md": { slug: "operations", title: "Operations runbook", section: "Guides", order: 7 },
+
+  // user-guide §17 is split into these pages (they nest under /docs/user-guide/). The KEY is the
+  // loom-docs-relative path, which is what rewriteLinks resolves a sibling link against.
+  "user-guide/grants-and-strict-mode.md": { slug: "user-guide/grants-and-strict-mode", title: "Grants and strict mode", section: "Guides", order: 8 },
+  "user-guide/quotas-supervision-and-cancellation.md": { slug: "user-guide/quotas-supervision-and-cancellation", title: "Quotas, supervision and cancellation", section: "Guides", order: 9 },
+  "user-guide/isolation-and-untrusted-content.md": { slug: "user-guide/isolation-and-untrusted-content", title: "Isolation and untrusted content", section: "Guides", order: 10 },
+  "user-guide/delivery-versioning-and-recovery.md": { slug: "user-guide/delivery-versioning-and-recovery", title: "Delivery, versioning and recovery", section: "Guides", order: 11 },
+  "user-guide/log-and-read-models.md": { slug: "user-guide/log-and-read-models", title: "The log and read models", section: "Guides", order: 12 },
 
   "architecture.md": { slug: "architecture", title: "Architecture", section: "Reference", order: 0 },
   "data-classification.md": { slug: "data-classification", title: "Data classification", section: "Reference", order: 1 },
@@ -273,7 +282,7 @@ function main() {
       section: meta.section,
       order: meta.order,
       source: `docs/${file}`,
-    }, rewriteLinks(raw, ""));
+    }, rewriteLinks(raw, dirname(file) === "." ? "" : dirname(file)));
     count++;
   }
 
