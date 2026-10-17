@@ -26,29 +26,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout site
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: loom-site
 
       - name: Checkout loom (docs source)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: chhetrisushil/loom
           token: ${{ secrets.LOOM_DOCS_TOKEN }}
           path: loom
 
       - name: Checkout loom-ui (docs source)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: chhetrisushil/loom-ui
           token: ${{ secrets.LOOM_DOCS_TOKEN }}
           path: loom-ui
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9.14.4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -87,7 +87,7 @@ jobs:
           echo "indexed $indexed pages for search"
           test "$indexed" -gt 50 || { echo "::error::only $indexed pages indexed — search would ship empty"; exit 1; }
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: loom-site/dist
 
@@ -99,4 +99,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
