@@ -1,9 +1,8 @@
 name: Deploy site to GitHub Pages
 
-# The docs live in the PRIVATE loom and loom-ui repos, so CI must check both out with a token
-# that can read them. Create a fine-grained PAT with `Contents: read` on BOTH chhetrisushil/loom
-# and chhetrisushil/loom-ui and store it as the LOOM_DOCS_TOKEN secret in this repository. Without
-# it the build fails loudly rather than publishing a site with no documentation.
+# The docs live in the public loom and loom-ui repos, so CI checks both out with the default
+# token — no secret needed. A failed checkout fails the build rather than publishing a site with
+# no documentation.
 on:
   push:
     branches: [main]
@@ -34,14 +33,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: chhetrisushil/loom
-          token: ${{ secrets.LOOM_DOCS_TOKEN }}
           path: loom
 
       - name: Checkout loom-ui (docs source)
         uses: actions/checkout@v7
         with:
           repository: chhetrisushil/loom-ui
-          token: ${{ secrets.LOOM_DOCS_TOKEN }}
           path: loom-ui
 
       - uses: pnpm/action-setup@v6

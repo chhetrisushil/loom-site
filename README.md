@@ -20,8 +20,8 @@ every sibling repo.
 
 ```bash
 # clone loom and loom-ui next to this repo
-git clone git@github.com:chhetrisushil/loom.git ../loom
-git clone git@github.com:chhetrisushil/loom-ui.git ../loom-ui
+git clone https://github.com/chhetrisushil/loom.git ../loom
+git clone https://github.com/chhetrisushil/loom-ui.git ../loom-ui
 
 pnpm install
 pnpm dev        # syncs docs, then serves at http://localhost:4321/loom-site/
@@ -56,8 +56,9 @@ Two consequences worth knowing:
 
 ## Publication boundary — read before adding pages
 
-`loom` and `loom-ui` are **private** repositories. This site is **public**, and everything it
-publishes is indexable and cacheable by third parties.
+`loom` and `loom-ui` are **public** repositories (their `@loom/*` and `@loom-ui/*` packages are
+not on npm yet), but this site is a curated edition of their docs, not a mirror. Internal working
+notes stay in the repos.
 
 `scripts/sync-docs.mjs` therefore publishes an **allowlist**, never a denylist:
 
@@ -68,13 +69,14 @@ publishes is indexable and cacheable by third parties.
 | `docs/spec/` — the normative kernel specification | `docs/loom-2.0/` — historical working notes |
 | loom-ui's `README.md` plus each package's `README.md`, named in `LOOM_UI_PAGES` | loom-ui's `AGENTS.md` and everything else in that repo |
 
-A new file added to `loom/docs` (or a new loom-ui package) is **private by default** — it appears
+A new file added to `loom/docs` (or a new loom-ui package) is **off the site by default** — it appears
 on the site only when someone adds it to `PAGES` / `LOOM_UI_PAGES` in the sync script. Keep it
 that way: an allowlist fails closed, a denylist fails open.
 
 loom-ui's README ends with a `## Consumers` section that names private products. It is stripped
 during sync (heading to next heading of the same level), and `sync-docs.mjs` fails the build if a
-published loom-ui page still carries that heading or links into a private repository — a backstop
+published loom-ui page still carries that heading or links into a repository outside the public
+loom family (`PUBLIC_REPOS`) — a backstop
 against a future edit reintroducing it elsewhere. loom-ui's own genericity fitness test keeps
 consumer names out of the rest of its docs.
 
@@ -102,12 +104,8 @@ review and obvious the moment you read `dist/`.
 `.github/workflows/deploy.yml` builds and deploys on every push to `main`, and can be triggered
 manually or by a `docs-updated` repository dispatch from the loom repo.
 
-Because the docs sources are private, CI needs a token that can read both of them:
-
-1. Create a fine-grained PAT with **`Contents: read`** on **both** `chhetrisushil/loom` and
-   `chhetrisushil/loom-ui`.
-2. Add it to this repo as the secret **`LOOM_DOCS_TOKEN`**.
-3. In **Settings → Pages**, set **Source: GitHub Actions**.
+The docs sources are public, so CI checks them out with the default token. The one manual
+setting: in **Settings → Pages**, set **Source: GitHub Actions**.
 
 The workflow fails loudly if fewer than 50 pages build, or if fewer than 50 are indexed for
 search — a site that deployed with no documentation is worse than one that failed to deploy, and
