@@ -1,22 +1,24 @@
-// Copy the PUBLIC subset of ../loom/docs into src/content/docs, rewriting links for the site.
+// Copy the curated subset of ../loom/docs into src/content/docs, rewriting links for the site.
 //
 // The docs live in the loom repo — that is where they are edited and reviewed, and vendoring a
 // second copy here would guarantee they drift apart (the failure this project has hit in every
 // sibling repo). So the site syncs at build time and treats its copy as a build artifact:
 // src/content/docs/ is gitignored.
 //
-// PUBLICATION BOUNDARY. loom is a PRIVATE repo; this site is public. Only the files named in
-// PAGES + the ADR/spec directories are published. `docs/requirements/` (internal evaluation
-// docs), `docs/presentation/` (decks) and `docs/loom-2.0/` are deliberately excluded and must
-// stay that way — an allowlist, never a denylist, so a new internal doc is private by default.
+// PUBLICATION BOUNDARY. loom is a public repo, but the site is a curated reader's edition of
+// it, not a mirror. Only the files named in PAGES + the ADR/spec directories are published.
+// `docs/requirements/` (internal evaluation docs), `docs/presentation/` (decks) and
+// `docs/loom-2.0/` are deliberately excluded — an allowlist, never a denylist, so a new
+// internal working note stays off the site until someone decides it belongs there.
 //
-// loom-ui — a second private sibling repo, a UI framework built on loom — is synced the same
+// loom-ui — a second public sibling repo, a UI framework built on loom — is synced the same
 // way, into its own "loom-ui" section: LOOM_UI_PAGES below is an explicit allowlist of its
 // README plus per-package READMEs (only those that exist are published). Its README's
 // `## Consumers` section names private products, so it is stripped on the way out (see
 // `stripSection`), and `assertNoPrivateLeak` fails the build if a published page still carries
-// that heading or links into a private repository. loom-ui's own genericity fitness test keeps
-// consumer names out of the rest of its docs; this is the publication-side backstop.
+// that heading or links into a repository outside the public loom family. loom-ui's own
+// genericity fitness test keeps consumer names out of the rest of its docs; this is the
+// publication-side backstop.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -91,11 +93,16 @@ const LOOM_UI_PAGES = {
 };
 
 // A published loom-ui page must not reintroduce the stripped consumer list (heading), nor link
-// into a private repository on the owner's account — the site's own "Source:" footer is added by
-// the page template, not the page body, so it is not affected by this check.
+// into a repository on the owner's account other than the public loom family below — the
+// consumers are private, so an allowlist again fails closed. The site's own "Source:" footer is
+// added by the page template, not the page body, so it is not affected by this check.
+const PUBLIC_REPOS = ["loom", "loom-ui", "loom-site", "loom-examples", "loom-demo", "loom-plugins"];
 const PRIVATE_LEAK_PATTERNS = [
   { re: /^#{1,6}\s+Consumers\s*$/im, why: "a Consumers section survived the strip" },
-  { re: /github\.com\/chhetrisushil\/(?!loom-site\b)[\w.-]+/i, why: "a link into a private repository" },
+  {
+    re: new RegExp(`github\\.com\\/chhetrisushil\\/(?!(?:${PUBLIC_REPOS.join("|")})(?:\\.git)?(?![\\w.-]))[\\w.-]+`, "i"),
+    why: "a link into a repository outside the public loom family",
+  },
 ];
 
 /** Fails the build outright: a published loom-ui page must not surface private consumers. */

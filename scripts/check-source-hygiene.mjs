@@ -13,7 +13,7 @@
 // the assumption that failed upstream.
 //
 // SCOPE IS `git ls-files` — what this repo OWNS. That deliberately excludes `src/content/docs/`,
-// which `sync-docs.mjs` writes at build time from the private ../loom checkout: it is gitignored
+// which `sync-docs.mjs` writes at build time from the sibling ../loom checkout: it is gitignored
 // here, and loom runs this same check over its own `docs/` tree, so guarding it here would
 // duplicate a check at the wrong end of the pipe and fail in a repo that cannot fix it.
 // Using git's own file list also means this can never drift from .gitignore.
