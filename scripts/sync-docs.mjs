@@ -21,7 +21,7 @@
 // publication-side backstop.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BASE } from "../site.config.mjs";
 
@@ -90,6 +90,14 @@ const LOOM_UI_PAGES = {
     title: "@loom-ui/renderer-terminal",
     order: 5,
   },
+  "packages/renderer-conformance/README.md": {
+    slug: "loom-ui/renderer-conformance",
+    title: "@loom-ui/renderer-conformance",
+    order: 6,
+  },
+  "packages/lineage/README.md": { slug: "loom-ui/lineage", title: "@loom-ui/lineage", order: 7 },
+  "packages/changes/README.md": { slug: "loom-ui/changes", title: "@loom-ui/changes", order: 8 },
+  "packages/learning/README.md": { slug: "loom-ui/learning", title: "@loom-ui/learning", order: 9 },
 };
 
 // A published loom-ui page must not reintroduce the stripped consumer list (heading), nor link
@@ -210,7 +218,7 @@ function targetForLoomUi(path) {
  */
 function rewriteLoomUiLinks(body, fromDir) {
   return body.replace(/\[([^\]]+)\]\((?!https?:|#|mailto:)([^)#\s]+)(#[^)\s]*)?\)/g, (_all, text, href, hash = "") => {
-    const rel = fromDir ? `${fromDir}/${href}`.replace(/[^/]+\/\.\.\//g, "") : href;
+    const rel = fromDir ? posix.join(fromDir, href) : href;
     const crossLoom = (rel.match(/^(?:\.\.\/)*loom\/docs\/(.+)$/) ?? href.match(/^(?:\.\.\/)*loom\/docs\/(.+)$/))?.[1];
     if (crossLoom) {
       const loomTarget = targetFor(crossLoom);
