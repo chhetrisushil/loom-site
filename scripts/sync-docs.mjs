@@ -64,6 +64,7 @@ const PAGES = {
   "data-protection-patterns.md": { slug: "data-protection", title: "Data-protection patterns", section: "Reference", order: 2 },
   "compliance.md": { slug: "compliance", title: "Compliance", section: "Reference", order: 3 },
   "acceptance-governance.md": { slug: "acceptance-governance", title: "Acceptance governance", section: "Reference", order: 4 },
+  "security-overview.md": { slug: "security", title: "Security overview", section: "Reference", order: 5 },
 };
 
 /** Directories published wholesale, each becoming its own sidebar section. */
