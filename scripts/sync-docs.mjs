@@ -24,6 +24,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BASE } from "../site.config.mjs";
+import { assertOrgConverted, orgToMarkdown } from "./org-to-md.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, "..");
@@ -50,6 +51,7 @@ const PAGES = {
   "transient-interpreter.md": { slug: "transient-interpreter", title: "Transient interpreter", section: "Guides", order: 5 },
   "composed-surfaces.md": { slug: "composed-surfaces", title: "Composed surfaces", section: "Guides", order: 6 },
   "operations.md": { slug: "operations", title: "Operations runbook", section: "Guides", order: 7 },
+  "usage-compiler.org": { slug: "compiler", title: "Compiler", section: "Guides", order: 8 },
 
   // user-guide §17 is split into these pages (they nest under /docs/user-guide/). The KEY is the
   // loom-docs-relative path, which is what rewriteLinks resolves a sibling link against.
@@ -66,6 +68,7 @@ const PAGES = {
   "acceptance-governance.md": { slug: "acceptance-governance", title: "Acceptance governance", section: "Reference", order: 4 },
   "security-overview.md": { slug: "security", title: "Security overview", section: "Reference", order: 5 },
   "codebase-guide.md": { slug: "codebase-guide", title: "Codebase guide", section: "Reference", order: 6 },
+  "api-reference.org": { slug: "api-reference", title: "API reference", section: "Reference", order: 7 },
 };
 
 /** Directories published wholesale, each becoming its own sidebar section. */
@@ -293,7 +296,9 @@ function main() {
       console.warn(`sync-docs: SKIP missing ${file}`);
       continue;
     }
-    const raw = readFileSync(src, "utf8");
+    const read = readFileSync(src, "utf8");
+    const raw = file.endsWith(".org") ? orgToMarkdown(read) : read;
+    if (file.endsWith(".org")) assertOrgConverted(raw, file);
     emit(join(OUT, `${meta.slug}.md`), {
       title: meta.title || titleFromBody(raw, meta.slug),
       section: meta.section,
