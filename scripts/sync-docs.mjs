@@ -78,7 +78,7 @@ const DIRS = [
 ];
 
 /**
- * The loom-ui allowlist: its README plus one README per package, published only when the file
+ * The loom-ui allowlist: its README, one README per package and the catalogue reference, published only when the file
  * exists in the checkout (a package with no README yet is simply skipped, same as a missing
  * PAGES entry above). `slug` fixes the route: the overview lands at exactly `/docs/loom-ui`, the
  * rest nest under it as `/docs/loom-ui/<package>`.
@@ -103,6 +103,8 @@ const LOOM_UI_PAGES = {
   "packages/lineage/README.md": { slug: "loom-ui/lineage", title: "@loom-ui/lineage", order: 7 },
   "packages/changes/README.md": { slug: "loom-ui/changes", title: "@loom-ui/changes", order: 8 },
   "packages/learning/README.md": { slug: "loom-ui/learning", title: "@loom-ui/learning", order: 9 },
+  // The catalogue and widget reference: the shape of a catalogue entry and of every widget kind's value.
+  "docs/reference/catalogue.md": { slug: "loom-ui/catalogue", title: "Catalogue and widgets", order: 10 },
 };
 
 // A published loom-ui page must not reintroduce the stripped consumer list (heading), nor link
