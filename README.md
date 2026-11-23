@@ -56,8 +56,8 @@ Two consequences worth knowing:
 
 ## Publication boundary — read before adding pages
 
-`loom` and `loom-ui` are **public** repositories (their `@loom/*` and `@loom-ui/*` packages are
-not on npm yet), but this site is a curated edition of their docs, not a mirror. Internal working
+`loom` and `loom-ui` are **public** repositories (their packages are on npm as `@loomwork/*` and
+`@loomwork/ui-*`), but this site is a curated edition of their docs, not a mirror. Internal working
 notes stay in the repos.
 
 `scripts/sync-docs.mjs` therefore publishes an **allowlist**, never a denylist:

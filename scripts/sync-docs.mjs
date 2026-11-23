@@ -56,11 +56,11 @@ const PAGES = {
 
   // user-guide §17 is split into these pages (they nest under /docs/user-guide/). The KEY is the
   // loom-docs-relative path, which is what rewriteLinks resolves a sibling link against.
-  "user-guide/grants-and-strict-mode.md": { slug: "user-guide/grants-and-strict-mode", title: "Grants and strict mode", section: "Guides", order: 9 },
-  "user-guide/quotas-supervision-and-cancellation.md": { slug: "user-guide/quotas-supervision-and-cancellation", title: "Quotas, supervision and cancellation", section: "Guides", order: 10 },
-  "user-guide/isolation-and-untrusted-content.md": { slug: "user-guide/isolation-and-untrusted-content", title: "Isolation and untrusted content", section: "Guides", order: 11 },
-  "user-guide/delivery-versioning-and-recovery.md": { slug: "user-guide/delivery-versioning-and-recovery", title: "Delivery, versioning and recovery", section: "Guides", order: 12 },
-  "user-guide/log-and-read-models.md": { slug: "user-guide/log-and-read-models", title: "The log and read models", section: "Guides", order: 13 },
+  "user-guide/grants-and-strict-mode.md": { slug: "user-guide/grants-and-strict-mode", title: "Grants and strict mode", section: "Guides", order: 10 },
+  "user-guide/quotas-supervision-and-cancellation.md": { slug: "user-guide/quotas-supervision-and-cancellation", title: "Quotas, supervision and cancellation", section: "Guides", order: 11 },
+  "user-guide/isolation-and-untrusted-content.md": { slug: "user-guide/isolation-and-untrusted-content", title: "Isolation and untrusted content", section: "Guides", order: 12 },
+  "user-guide/delivery-versioning-and-recovery.md": { slug: "user-guide/delivery-versioning-and-recovery", title: "Delivery, versioning and recovery", section: "Guides", order: 13 },
+  "user-guide/log-and-read-models.md": { slug: "user-guide/log-and-read-models", title: "The log and read models", section: "Guides", order: 14 },
 
   "architecture.md": { slug: "architecture", title: "Architecture", section: "Reference", order: 0 },
   "data-classification.md": { slug: "data-classification", title: "Data classification", section: "Reference", order: 1 },
@@ -87,23 +87,23 @@ const DIRS = [
 const LOOM_UI_SECTION = "loom-ui";
 const LOOM_UI_PAGES = {
   "README.md": { slug: "loom-ui", title: "loom-ui", order: 0 },
-  "packages/core/README.md": { slug: "loom-ui/core", title: "@loom-ui/core", order: 1 },
-  "packages/hydration/README.md": { slug: "loom-ui/hydration", title: "@loom-ui/hydration", order: 2 },
-  "packages/planner/README.md": { slug: "loom-ui/planner", title: "@loom-ui/planner", order: 3 },
-  "packages/renderer-lit/README.md": { slug: "loom-ui/renderer-lit", title: "@loom-ui/renderer-lit", order: 4 },
+  "packages/core/README.md": { slug: "loom-ui/core", title: "@loomwork/ui-core", order: 1 },
+  "packages/hydration/README.md": { slug: "loom-ui/hydration", title: "@loomwork/ui-hydration", order: 2 },
+  "packages/planner/README.md": { slug: "loom-ui/planner", title: "@loomwork/ui-planner", order: 3 },
+  "packages/renderer-lit/README.md": { slug: "loom-ui/renderer-lit", title: "@loomwork/ui-renderer-lit", order: 4 },
   "packages/renderer-terminal/README.md": {
     slug: "loom-ui/renderer-terminal",
-    title: "@loom-ui/renderer-terminal",
+    title: "@loomwork/ui-renderer-terminal",
     order: 5,
   },
   "packages/renderer-conformance/README.md": {
     slug: "loom-ui/renderer-conformance",
-    title: "@loom-ui/renderer-conformance",
+    title: "@loomwork/ui-renderer-conformance",
     order: 6,
   },
-  "packages/lineage/README.md": { slug: "loom-ui/lineage", title: "@loom-ui/lineage", order: 7 },
-  "packages/changes/README.md": { slug: "loom-ui/changes", title: "@loom-ui/changes", order: 8 },
-  "packages/learning/README.md": { slug: "loom-ui/learning", title: "@loom-ui/learning", order: 9 },
+  "packages/lineage/README.md": { slug: "loom-ui/lineage", title: "@loomwork/ui-lineage", order: 7 },
+  "packages/changes/README.md": { slug: "loom-ui/changes", title: "@loomwork/ui-changes", order: 8 },
+  "packages/learning/README.md": { slug: "loom-ui/learning", title: "@loomwork/ui-learning", order: 9 },
   // The catalogue and widget reference: the shape of a catalogue entry and of every widget kind's value.
   "docs/reference/catalogue.md": { slug: "loom-ui/catalogue", title: "Catalogue and widgets", order: 10 },
 };
