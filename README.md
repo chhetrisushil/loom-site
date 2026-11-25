@@ -64,10 +64,10 @@ notes stay in the repos.
 
 | Published | Not published |
 | --- | --- |
-| The 15 curated top-level guides named in `PAGES` | `docs/requirements/` — internal evaluation and planning docs |
+| The curated guides named in `PAGES` | `docs/requirements/` — internal evaluation and planning docs |
 | `docs/adr/` — architectural decision records | `docs/presentation/` — talk decks and presenter notes |
-| `docs/spec/` — the normative kernel specification | `docs/loom-2.0/` — historical working notes |
-| loom-ui's `README.md` plus each package's `README.md`, named in `LOOM_UI_PAGES` | loom-ui's `AGENTS.md` and everything else in that repo |
+| `docs/spec/` — the kernel specification, its compatibility, fitness and maturity pages, and the task-authority whitepaper | `docs/loom-2.0/` — historical working notes |
+| loom-ui's `README.md`, its package READMEs and its catalogue reference, named in `LOOM_UI_PAGES` | loom-ui's `AGENTS.md` and everything else in that repo |
 
 A new file added to `loom/docs` (or a new loom-ui package) is **off the site by default** — it appears
 on the site only when someone adds it to `PAGES` / `LOOM_UI_PAGES` in the sync script. Keep it
@@ -81,18 +81,20 @@ against a future edit reintroducing it elsewhere. loom-ui's own genericity fitne
 consumer names out of the rest of its docs.
 
 The deploy workflow asserts the requirements-docs exclusion too, failing the build if
-`dist/docs/requirements` ever exists, if `dist/docs/loom-ui` is missing, or if any of those three
-strings appear under `dist/docs/loom-ui`.
+`dist/docs/requirements` ever exists, if `dist/docs/loom-ui` is missing, or if a Consumers heading
+survives under `dist/docs/loom-ui`.
 
 ## Checks
 
-`pnpm check` runs two things, and CI runs it after every build:
+`pnpm check` runs three things, and CI runs it after every build:
 
+- **`scripts/check-source-hygiene.mjs`** — no raw control bytes in the tracked files
+  (one NUL byte makes git treat a file as binary and hide its diffs).
 - **`astro check`** — types and component diagnostics.
 - **`scripts/check-links.mjs`** — every internal `href` in the *built* `dist/` resolves to a page
   that was actually built.
 
-The second exists because two link bugs shipped and nothing noticed. `astro check` never opens the
+The link check exists because two link bugs shipped and nothing noticed. `astro check` never opens the
 emitted HTML, and a markdown link is only text until it does: (1) synced doc links were written
 without the `/loom-site` base, so 365 of them addressed a different repo's user site; (2) link
 targets were derived from the source **filename** while Astro derives the route from a **slugified**
@@ -116,7 +118,9 @@ a search box that finds nothing reads as a broken site rather than a failed buil
 ```
 site.config.mjs              BASE — the deployment prefix, written once
 scripts/sync-docs.mjs        the publication boundary + link rewriting
+scripts/org-to-md.mjs        converts loom's .org docs to markdown during the sync
 scripts/index-search.mjs     builds the Pagefind index over dist/, mirrors it into public/
+scripts/check-source-hygiene.mjs  no raw control bytes in tracked files (part of `pnpm check`)
 scripts/check-links.mjs      asserts every internal link in dist/ resolves (part of `pnpm check`)
 src/pages/index.astro        landing page
 src/pages/docs/index.astro   docs hub
