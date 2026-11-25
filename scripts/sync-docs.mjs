@@ -53,6 +53,7 @@ const PAGES = {
   "composed-surfaces.md": { slug: "composed-surfaces", title: "Composed surfaces", section: "Guides", order: 7 },
   "operations.md": { slug: "operations", title: "Operations runbook", section: "Guides", order: 8 },
   "usage-compiler.org": { slug: "compiler", title: "Compiler", section: "Guides", order: 9 },
+  "custom-grant-broker.md": { slug: "custom-grant-broker", title: "Write your own grant broker", section: "Guides", order: 15 },
 
   // user-guide §17 is split into these pages (they nest under /docs/user-guide/). The KEY is the
   // loom-docs-relative path, which is what rewriteLinks resolves a sibling link against.
